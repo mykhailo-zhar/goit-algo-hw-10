@@ -1,6 +1,6 @@
 import pytest
 
-from src.greedy import find_coins_greedy, find_min_coins
+from src.greedy import find_coins_greedy, find_min_coins, find_min_coins_recursive
 
 
 @pytest.fixture
@@ -40,3 +40,11 @@ def test_min_coins(coins, result):
 
 def test_min_coins_shuffles(coins_shuffle, result):
     assert find_min_coins(coins_shuffle, 113) == result
+
+
+def test_min_coins_recursive(coins, result):
+    assert find_min_coins_recursive(coins, 113) == result
+
+
+def test_min_coins_recursive_shuffles(coins_shuffle, result):
+    assert find_min_coins_recursive(coins_shuffle, 113) == result

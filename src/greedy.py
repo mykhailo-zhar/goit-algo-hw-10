@@ -198,26 +198,23 @@ def find_min_coins(coins: list[int], summ: int) -> dict[int, int]:
     return Counter(dp[summ][1]) if dp[summ][0] != float("inf") else {}
 
 
-def benchmark():
-    coins = [50, 25, 10, 5, 2, 1]
-    amount = 113
-    number = 1000
-
-    setup = (
-        "from __main__ import find_coins_greedy, find_min_coins_recursive, find_min_coins; "
-        f"coins = {coins!r}; amount = {amount}"
-    )
+def benchmark(
+    coins: list[int] | None = None, amount: int = 113, number: int = 1000
+) -> None:
+    """Run timeit benchmarks for greedy and DP coin-change functions."""
+    if coins is None:
+        coins = [50, 25, 10, 5, 2, 1]
 
     benchmarks = [
-        ("find_coins_greedy", "find_coins_greedy(coins, amount)"),
-        ("find_min_coins_recursive", "find_min_coins_recursive(coins, amount)"),
-        ("find_min_coins", "find_min_coins(coins, amount)"),
+        ("find_coins_greedy", lambda: find_coins_greedy(coins, amount)),
+        ("find_min_coins_recursive", lambda: find_min_coins_recursive(coins, amount)),
+        ("find_min_coins", lambda: find_min_coins(coins, amount)),
     ]
 
     print(f"Benchmark (coins={coins}, amount={amount}, number={number})")
     print("-" * 60)
-    for name, stmt in benchmarks:
-        elapsed = timeit.timeit(stmt=stmt, setup=setup, number=number)
+    for name, fn in benchmarks:
+        elapsed = timeit.timeit(fn, number=number)
         print(f"{name:28} {elapsed:.6f}s  ({elapsed / number * 1e6:.2f} µs/call)")
 
 

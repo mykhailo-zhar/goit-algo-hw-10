@@ -1,3 +1,7 @@
+"""Розрахунок інтегралу методом Монте-Карло"""
+
+from __future__ import annotations
+
 import random
 
 import matplotlib.pyplot as plt
@@ -64,7 +68,7 @@ def main():
     maximum = calculate_max(a, b)
     n_points = 1000
     n_experiments = 1000
-    _, points, inside_points = monte_carlo_simulation(maximum, a, b, n_points)
+    _, points, __ = monte_carlo_simulation(maximum, a, b, n_points)
     # Plot Monte Carlo points
     points = np.array(points)
     monte_carlo_result = monte_carlo_simulations(a, b, maximum, n_experiments, n_points)

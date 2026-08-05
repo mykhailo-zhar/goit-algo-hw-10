@@ -1,8 +1,21 @@
 import heapq
+import timeit
 from collections import Counter
 
 
 def find_coins_greedy(coins: list[int], sum: int) -> dict[int, int]:
+    """
+    Python program to find minimum of coins using greedy algorithm.
+
+    Complexity ~ O(C log C)
+
+    Args:
+        coins (list[int]): coins to use
+        summ (int): summ to optimize
+
+    Returns:
+        dict[int, int]: resulting coins distribution
+    """
     result = {}
     heap = [-el for el in coins]  # O(N) - ітерація по масиву
     heapq.heapify(heap)  # O(logN)
@@ -23,6 +36,24 @@ def find_coins_greedy(coins: list[int], sum: int) -> dict[int, int]:
 
 
 def _min_coins_recursive(coins: list[int], sum: int, coin_index):
+    """
+    Recursively find the minimum number of coins for a given sum.
+
+    Explores take / not-take choices for coins[coin_index] without memoization.
+
+    Complexity ~ O(2^(S/min(C))) in the worst case
+
+    C - len(coins)
+    S - sum
+
+    Args:
+        coins (list[int]): available coin denominations
+        sum (int): remaining amount to make
+        coin_index (int): index of the coin currently considered
+
+    Returns:
+        list: [coin_count, list_of_chosen_coins]; coin_count is inf if impossible
+    """
     if sum == 0:
         return [0, []]
 
@@ -39,6 +70,26 @@ def _min_coins_recursive(coins: list[int], sum: int, coin_index):
 
 
 def _min_coins_recursive_memo(coins: list[int], sum: int, coin_index: int, memo: dict):
+    """
+    Recursively find the minimum number of coins with top-down memoization.
+
+    Same take / not-take recursion as `_min_coins_recursive`, but caches
+    results for each (coin_index, sum) pair.
+
+    Complexity ~ O(C * S)
+
+    C - len(coins)
+    S - sum
+
+    Args:
+        coins (list[int]): available coin denominations
+        sum (int): remaining amount to make
+        coin_index (int): index of the coin currently considered
+        memo (list[list]): cache of [coin_count, coins_list] or -1 if unset
+
+    Returns:
+        list: [coin_count, list_of_chosen_coins]; coin_count is inf if impossible
+    """
     if sum == 0:
         return [0, []]
 
@@ -46,6 +97,7 @@ def _min_coins_recursive_memo(coins: list[int], sum: int, coin_index: int, memo:
         return [float("inf"), []]
 
     if memo[coin_index][sum] != -1:
+        # Return a copy to avoid mutating the cached coin list downstream.
         return memo[coin_index][sum]
 
     take = _min_coins_recursive_memo(coins, sum - coins[coin_index], coin_index, memo)
@@ -59,12 +111,25 @@ def _min_coins_recursive_memo(coins: list[int], sum: int, coin_index: int, memo:
     return memo[coin_index][sum]
 
 
-def find_min_coins(coins: list[int], sum: int) -> dict[int, int]:
+def find_min_coins_recursive(coins: list[int], sum: int) -> dict[int, int]:
+    """
+    Find the minimum number of coins using memoized recursion.
 
+    Complexity ~ O(C * S)
+
+    C - len(coins)
+    S - sum
+
+    Args:
+        coins (list[int]): coins to use
+        sum (int): sum to optimize
+
+    Returns:
+        dict[int, int]: resulting coins distribution
+    """
     # result = Counter(_min_coins_recursive(coins, sum, 0)[1])
     memo = [[-1] * (sum + 1) for _ in range(len(coins))]
     result = _min_coins_recursive_memo(coins, sum, 0, memo)
-    print(result[0])
     result = Counter(result[1])
 
     return dict(result)
@@ -131,3 +196,30 @@ def find_min_coins(coins: list[int], summ: int) -> dict[int, int]:
     # Return the result for the given sum,
     # or -1 if it's not possible
     return Counter(dp[summ][1]) if dp[summ][0] != float("inf") else {}
+
+
+def benchmark():
+    coins = [50, 25, 10, 5, 2, 1]
+    amount = 113
+    number = 1000
+
+    setup = (
+        "from __main__ import find_coins_greedy, find_min_coins_recursive, find_min_coins; "
+        f"coins = {coins!r}; amount = {amount}"
+    )
+
+    benchmarks = [
+        ("find_coins_greedy", "find_coins_greedy(coins, amount)"),
+        ("find_min_coins_recursive", "find_min_coins_recursive(coins, amount)"),
+        ("find_min_coins", "find_min_coins(coins, amount)"),
+    ]
+
+    print(f"Benchmark (coins={coins}, amount={amount}, number={number})")
+    print("-" * 60)
+    for name, stmt in benchmarks:
+        elapsed = timeit.timeit(stmt=stmt, setup=setup, number=number)
+        print(f"{name:28} {elapsed:.6f}s  ({elapsed / number * 1e6:.2f} µs/call)")
+
+
+if __name__ == "__main__":
+    benchmark()
